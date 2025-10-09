@@ -1,11 +1,31 @@
-
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import { Redirect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUserId } from '@/store/userIdStore';
 
-const index = () => {
+const Index = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const { setUsername } = useUserId()
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const userIdTemp = await AsyncStorage.getItem('userId');
+      setUserId(userIdTemp || '');
+      if (userIdTemp) {
+        setUsername(userIdTemp);
+      }
+    };
+
+    getUserId();
+  }, []);
+
+  if (userId === null) return null; 
+
   return (
-    <Redirect href={'/Login'}/>
-  )
-}
+    <>
+      {userId === '' ? <Redirect href="/Login" /> : <Redirect href="/Attendance" />}
+    </>
+  );
+};
 
-export default index; 
+export default Index;

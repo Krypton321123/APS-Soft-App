@@ -1,11 +1,11 @@
-import { Stack } from 'expo-router';
 import 'react-native-reanimated';
+import { Stack } from 'expo-router';
+import { StatusBar} from 'react-native';
 import '../global.css'
+import '@/tasks/locationTask'
 import { useFonts } from 'expo-font'
 
-
-const RootLayout = () => {
-
+export default function RootLayout() {
   const [loaded, error] = useFonts({
     'Geist-Regular': require('@/assets/fonts/Geist-Regular.ttf'), 
     'Geist-Bold': require('@/assets/fonts/Geist-Bold.ttf'), 
@@ -17,10 +17,15 @@ const RootLayout = () => {
     return null;
   }
 
-  return (
-      <Stack screenOptions={{ headerShown: false }}/>
-
+  return ( 
+    <>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent={true}
+      />
+      <Stack screenOptions={{ headerShown: false }} />
+    </>
   );
 }
 
-export default RootLayout;

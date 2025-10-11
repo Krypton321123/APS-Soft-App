@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { API_URL } from '@/constants'
 import ky from 'ky'
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const PartyDetails = () => {
   const { partyId } = useLocalSearchParams()
@@ -20,6 +21,17 @@ const PartyDetails = () => {
     imageUrl2: '',
   })
   const [loading, setLoading] = useState(true)
+  const [username, setUsername] = useState(''); 
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const user = await AsyncStorage.getItem('userId');
+      if (user) {
+        setUsername(user);
+      }
+    }
+    getUserId();
+  }, [])
 
   const fetchParty = async () => {
     try {
@@ -36,7 +48,7 @@ const PartyDetails = () => {
           emailId: response.data.emailId || '',
           profileImageUrl: response.data.profileImageUrl || '',
           imageUrl2: response.data.imageUrl2 || '',
-          outstandingAmount: response.data.outstanding.outamt
+          outstandingAmount: response.data.outstanding.outamt || 0
         }))
       }
 
@@ -130,7 +142,7 @@ const PartyDetails = () => {
         <View className="flex-row justify-around py-4 bg-white border-b border-gray-200">
           <TouchableOpacity className="items-center" onPress={() => router.push({
             pathname: '/order/Order', 
-            params: {partyId, partyName: partyDetails.lednm}
+            params: {partyId, partyName: partyDetails.lednm, userId: username}
           })}>
             <View className="w-12 h-12 rounded-full bg-blue-100 justify-center items-center mb-1">
               <Text className="text-blue-600 text-xl">📋</Text>

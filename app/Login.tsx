@@ -18,6 +18,7 @@ import { API_URL } from '@/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRouter } from 'expo-router';
 import { useUserId } from '@/store/userIdStore';
+import { startTracking } from '@/utils/locations';
 
 const Login = () => {
   const [username1, setUsername1] = useState('');
@@ -41,12 +42,15 @@ const Login = () => {
       if (data.statusCode === 200 || data.statusCode === 201) {
         Alert.alert('Success!', "Logged in successfuly")
         await AsyncStorage.setItem('userId', username1)
-    
-        setUsername(username1); 
+        await AsyncStorage.setItem('username', data.data.user.usrnm)
+        await startTracking()
+
+        setUsername(data.data.user.usrnm, username1); 
         return router.replace('/Attendance');
       }
     } catch (err: any) {
         console.log('we are here in catch')
+        console.log(err)
         return Alert.alert("Login error", "Username or password is wrong")
     } finally {
       setIsLoading(false);

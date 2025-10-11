@@ -10,9 +10,10 @@ const Index = () => {
   useEffect(() => {
     const getUserId = async () => {
       const userIdTemp = await AsyncStorage.getItem('userId');
+      const usernameTemp= await AsyncStorage.getItem("username")
       setUserId(userIdTemp || '');
       if (userIdTemp) {
-        setUsername(userIdTemp);
+        setUsername(usernameTemp || "", userIdTemp)
       }
     };
 

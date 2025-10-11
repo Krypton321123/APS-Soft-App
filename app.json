@@ -24,9 +24,11 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO", 
-        "ACCESS_FINE_LOCATION", 
-        "ACCESS_COARSE_LOCATION", 
-        "ACCESS_BACKGROUND_LOCATION"
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
       ],
       "package": "com.krypton321123.testcamerageolocation"
     },
@@ -63,7 +65,15 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser", 
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow APS to use your location.", 
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

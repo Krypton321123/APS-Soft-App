@@ -34,7 +34,6 @@ const Collection = () => {
   const [chequeNumber, setChequeNumber] = useState('');
   const [chequeDate, setChequeDate] = useState('');
   const [bankName, setBankName] = useState('');
-  const [upiId, setUpiId] = useState('');
   const [transactionId, setTransactionId] = useState('');
 
 
@@ -134,7 +133,7 @@ const Collection = () => {
       return;
     }
 
-    if (paymentMethod === 'online' && (!upiId || !transactionId || !onlinePaymentImage)) {
+    if (paymentMethod === 'online' && (!transactionId || !onlinePaymentImage)) {
       Alert.alert('Error', 'Please fill all online payment details and add payment screenshot');
       return;
     }
@@ -160,7 +159,6 @@ const Collection = () => {
         formData.append('chequeDate', chequeDate) 
         formData.append('bankName', bankName)
       } else if (paymentMethod === 'online') {
-        formData.append('upiId', upiId)
         formData.append('transactionId', transactionId)
       }
       if (paymentMethod === 'cheque' || paymentMethod === 'online') {
@@ -468,17 +466,6 @@ const Collection = () => {
                 {/* Online Payment Fields */}
                 {paymentMethod === 'online' && (
                   <>
-                    <View className="mb-5">
-                      <Text className="text-sm font-GeistMedium text-gray-500 mb-2">UPI ID</Text>
-                      <TextInput
-                        className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800 border border-gray-200"
-                        placeholder="Enter UPI ID"
-                        value={upiId}
-                        onChangeText={setUpiId}
-                        placeholderTextColor="#94A3B8"
-                      />
-                    </View>
-
                     <View className="mb-5">
                       <Text className="text-sm font-GeistMedium text-gray-500 mb-2">Transaction ID</Text>
                       <TextInput

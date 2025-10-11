@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Home = () => {
     const router = useRouter()
-    const { username, setUsername } = useUserId()
+    const { username, userId } = useUserId()
     const [loading, setLoading] = useState(false)
     const [parties, setParties] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
@@ -31,6 +31,8 @@ const Home = () => {
                     day: currentDay // Add the selected day to the request
                 }
             }).json()
+
+            console.log(response)
             
             if (response.success && response.data) {
                 setParties(response.data)
@@ -56,10 +58,10 @@ const Home = () => {
 
 
     useEffect(() => {
-        if (username) {
-            fetchData(username)
+        if (userId) {
+            fetchData(userId)
         }
-    }, [username, currentDay]) // Add currentDay as dependency to refetch when day changes
+    }, [userId, currentDay]) // Add currentDay as dependency to refetch when day changes
 
     useEffect(() => {
         // Filter parties based on search query
@@ -86,6 +88,7 @@ const Home = () => {
       >
           <Text className="font-GeistBold text-lg">{item.lednm}</Text>
           <Text className="text-gray-600 mt-1">{item.ledadr1}</Text>
+          <Text className=' mt-1 font-bold text-lg text-black'>OUTS: {item.outs}</Text>
       </TouchableOpacity>
   )
 
@@ -104,12 +107,12 @@ const Home = () => {
                 {/* Header with Welcome and Logout */}
                 <View className="flex-row justify-between items-center mb-1">
                     <View>
-                        <Text className="text-white text-xl font-GeistBold">Welcome, {username}</Text>
+                        <Text className="text-white text-xl font-GeistBold">Welcome, <Text className='text-lg'>{username}</Text></Text>
                         <Text className="text-white text-sm">BEAT / {currentDay}</Text>
                     </View>
                     <TouchableOpacity 
                         className="bg-slate-900 px-3 py-2 rounded-lg"
-                        onPress={() => router.push({ pathname: '/summary/PreSummary', params: {userId: username} })}
+                        onPress={() => router.push({ pathname: '/summary/PreSummary', params: {userId: userId} })}
                     >
                         <Text className="text-white font-GeistBold">Summary</Text>
                     </TouchableOpacity>

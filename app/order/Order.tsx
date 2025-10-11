@@ -53,7 +53,7 @@ interface InputQuantities {
 
 const Order: React.FC = () => {
   const router = useRouter();
-  const { partyId, partyName } = useLocalSearchParams<any>();
+  const { partyId, partyName, userId } = useLocalSearchParams<any>();
   const [orderQuantities, setOrderQuantities] = useState<OrderQuantities>({});
   // Store input values as strings to fix the first digit skipping issue
   const [inputQuantities, setInputQuantities] = useState<InputQuantities>({});
@@ -71,9 +71,10 @@ const Order: React.FC = () => {
   const flatListRef = useRef<FlatList<Item> | null>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
   const discountInputRef = useRef<TextInput | null>(null);
-  const [userId, setUserId] = useState<string | null>(null); // Add userId state
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('cash');
   const [creditDays, setCreditDays] = useState<string>('');
+  const [consumerRate, setConsumerRate] = useState(); 
+  const [bulkRate, setBulkRate] = useState(); 
 
   useEffect(() => {
     const fetchTodayOrders = async () => {
@@ -135,30 +136,21 @@ const Order: React.FC = () => {
   });
 
   useEffect(() => {
-    const getUserId = async () => {
-      const user = await AsyncStorage.getItem('userId');
-      if (user) {
-        setUserId(user);
-      }
-    }
-    getUserId();
+    fetchItems()
   }, [searchTerm]);
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
+  
 
   const fetchItems = async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await ky.get(`${API_URL}/user/getItems`).json<{
-        success: boolean;
-        data?: Item[];
-      }>();
-      
+      const response = await ky.post(`${API_URL}/user/getItems`, {json: {userId}}).json<any>();
+      console.log(response)
       if (response.success && response.data) {
-        setItems(response.data);
+        setItems(response.data.items);
+        setConsumerRate(response.data.consumerRate)
+        setBulkRate(response.data.bulkRate)
       } else {
         setError('Failed to fetch items');
       }
@@ -509,10 +501,11 @@ const Order: React.FC = () => {
                 style={{ opacity: orderSummaryOpacity }} 
                 className="pt-2"
               >
-                <Text className="text-indigo-200 text-xs mb-1">ORDER SUMMARY</Text>
                 <View className="flex-row justify-between mb-2">
-                  <Text className="text-white">Total: <Text className="font-bold">₹{totalAmount}</Text></Text>
-                  <Text className="text-white">Discount: <Text className="font-bold">₹{discountValue}</Text></Text>
+                     <Text className="text-white">Consumer Rate: <Text className="font-bold">₹{consumerRate}</Text></Text>
+                    <Text className="text-white">Bulk Rate: <Text className="font-bold">₹{bulkRate}</Text></Text>
+                   
+               
                 </View>
               </Animated.View>
 

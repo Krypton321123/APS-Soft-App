@@ -36,4 +36,6 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
-constants.ts
+/constants.ts
+android
+ios

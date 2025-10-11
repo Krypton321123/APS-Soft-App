@@ -2,11 +2,13 @@ import { create } from 'zustand'
 
 interface UserIdState {
     username: string, 
-    setUsername: (username: string) => void
+    userId: string, 
+    setUsername: (username: string, userId: string) => void
 }
 
 export const useUserId = create<UserIdState>((set) => ({
-    username: '',
-    setUsername: (username: string) => set(() => ({ username: username })),
+    username: '', 
+    userId: '', 
+    setUsername: (username: string, userId: string) => set(() => ({ username: username, userId: userId })),
   }))
   

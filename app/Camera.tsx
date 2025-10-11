@@ -135,7 +135,7 @@ const processPhoto = async (): Promise<void> => {
         const filename = finalPhotoUri.split('/').pop();
         if (caller === 'attendance') {
 
-           
+            console.log(userId)
             formData.append('userId', userId)
             formData.append('status', "present")
             formData.append('time', new Date().toLocaleDateString("en-CA", {
@@ -169,7 +169,7 @@ const processPhoto = async (): Promise<void> => {
                     year: '2-digit'
                 })
                 await AsyncStorage.setItem("attendanceData", JSON.stringify({date, marked: "present"}))
-                await startTracking()
+                
 
                 Alert.alert('Attendance Marked', "Attendance has been successfully marked!\nLocation Tracking has been started", [
                     {text: 'Ok', onPress: () => {router.replace('/PreHome')}}

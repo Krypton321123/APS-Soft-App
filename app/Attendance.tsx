@@ -13,27 +13,22 @@ export default function Attendance() {
 
     useEffect(() => {
         const getAttendanceData = async () => {
-            const tempAttendanceData = await AsyncStorage.getItem('attendanceData')
+            const userId = await AsyncStorage.getItem('userId'); 
 
-            if (tempAttendanceData === null) {
-                console.log("came here")
-                return; 
-            }
-
-            console.log(tempAttendanceData)
-
-            const data = JSON.parse(tempAttendanceData)
-            const todayDate = new Date().toLocaleString('en-IN', {
+            const todayDate = new Date().toLocaleString('en-CA', {
                 day: '2-digit', 
                 month: '2-digit', 
-                year: '2-digit'
+                year: 'numeric'
             })
 
-            if (todayDate === data?.date && data.marked === 'present') {
+
+            const response: any = await ky.post(`${API_URL}/attendance/checkAttendance`, {json: {userId, date: todayDate}}).json();
+            console.log(response)
+            if (response.statusCode === 201) {
                 return router.replace('/PreHome')
-            } else if (todayDate === data?.date && data.marked === 'absent') {
-                return ToastAndroid.show("Already marked absent for today", ToastAndroid.SHORT); 
-            } else {
+            } else if (response.statusCode === 200) {
+                return ToastAndroid.show('YOU ALREADY MARKED ABSENT FOR TODAY!', ToastAndroid.SHORT)
+            } else if(response.statusCode === 202) {
                 return; 
             }
         }

@@ -6,9 +6,15 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
+    "updates": {
+      "url": "https://u.expo.dev/e1bc1efa-536d-4576-8239-5de0a6db66a2"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "jsEngine": "jsc",
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.krypton321123.testcamerageolocation"
@@ -23,7 +29,7 @@
       },
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO", 
+        "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_BACKGROUND_LOCATION",
@@ -65,11 +71,11 @@
           }
         }
       ],
-      "expo-web-browser", 
+      "expo-web-browser",
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow APS to use your location.", 
+          "locationAlwaysAndWhenInUsePermission": "Allow APS to use your location.",
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true
         }
@@ -85,6 +91,7 @@
       "eas": {
         "projectId": "e1bc1efa-536d-4576-8239-5de0a6db66a2"
       }
-    }
+    },
+    "owner": "krypton321123"
   }
 }

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useUserId } from '@/store/userIdStore'
 import ky from 'ky'
-import { API_URL } from '@/constants'
+import { API_URL } from '../constants'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -28,7 +28,7 @@ const Home = () => {
             const response: any = await ky.post(`${API_URL}/user/fetchParty`, {
                 json: { 
                     username: userToFetch,
-                    day: currentDay // Add the selected day to the request
+                    day: currentDay
                 }
             }).json()
 
@@ -84,7 +84,7 @@ const Home = () => {
     const renderPartyItem = ({ item }: {item: any}) => (
       <TouchableOpacity 
           className="bg-white p-4 rounded-lg shadow-sm mb-3 mx-2 border border-gray-200"
-          onPress={() => router.push(`/party/${item.ledcd}`)}
+          onPress={() => router.push(`/party/${item.ledcd}/${item.lednm}` as any)}
       >
           <Text className="font-GeistBold text-lg">{item.lednm}</Text>
           <Text className="text-gray-600 mt-1">{item.ledadr1}</Text>
@@ -111,8 +111,8 @@ const Home = () => {
                         <Text className="text-white text-sm">BEAT / {currentDay}</Text>
                     </View>
                     <TouchableOpacity 
-                        className="bg-slate-900 px-3 py-2 rounded-lg"
-                        onPress={() => router.push({ pathname: '/summary/PreSummary', params: {userId: userId} })}
+                        className="bg-slate-900 px-3 py-2 mr-6 mt-5 rounded-lg"
+                        onPress={() => router.push({ pathname: '/summary/PreSummary', params: {userId: userId, username: username} })}
                     >
                         <Text className="text-white font-GeistBold">Summary</Text>
                     </TouchableOpacity>

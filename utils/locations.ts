@@ -15,7 +15,7 @@ export async function startTracking() {
     await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
     accuracy: Location.Accuracy.Highest,
     timeInterval: 0,
-    distanceInterval: 10,
+    distanceInterval: 1000,
     showsBackgroundLocationIndicator: true,
     foregroundService: {
       notificationTitle: "Tracking active",

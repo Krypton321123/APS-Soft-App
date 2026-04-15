@@ -8,6 +8,7 @@ import { API_URL } from '@/constants'
 
 const EditParty = () => {
   const { partyId, partyName } = useLocalSearchParams()
+  
   const router = useRouter()
   
   const [formData, setFormData] = useState({

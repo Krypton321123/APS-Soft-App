@@ -10,15 +10,14 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '@/constants'
+import { API_URL } from '../constants'
 import { useRouter } from 'expo-router'
 import mime from 'mime'
 import { startTracking } from '@/utils/locations'
  
 const Camera = () => {
     // Extract the partyId from local search params
-    const { partyId, caller } = useLocalSearchParams<{ partyId: string, caller: string }>();
-
+    const { partyId, caller, userType } = useLocalSearchParams<{ partyId: string, caller: string, userType: string }>();
     const [facing, setFacing] = useState<CameraType>(caller === 'attendance' ? 'front' : 'back')
     const [permission, requestPermission] = useCameraPermissions(); 
     const [photoData, setPhotoData] = useState<CameraCapturedPicture | null>(null)
@@ -151,7 +150,6 @@ const processPhoto = async (): Promise<void> => {
              const response = await fetch(`${API_URL}/user/markAttendance`, {
                 method: 'POST',
                 headers: {
-                    
                     Accept: 'application/json',
                 },
                 body: formData,
@@ -172,7 +170,7 @@ const processPhoto = async (): Promise<void> => {
                 
 
                 Alert.alert('Attendance Marked', "Attendance has been successfully marked!\nLocation Tracking has been started", [
-                    {text: 'Ok', onPress: () => {router.replace('/PreHome')}}
+                    {text: 'Ok', onPress: () => {router.replace(userType === "Salesman" ? '/PreHome' : '/Delivery')}}
                 ])
 
                 setPhotoData(null);

@@ -3,10 +3,8 @@ import React, { useState, useRef, useEffect } from 'react'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import ky from 'ky'
-import { API_URL } from '@/constants'
+import { API_URL } from '../constants'
 import { isTracking, startTracking, stopTracking } from '@/utils/locations'
-import * as Location from 'expo-location'
-import { LOCATION_TASK_NAME } from '@/tasks/locationTask'
 
 const PreHome = () => {
   const [attendanceModalVisible, setAttendanceModalVisible] = useState(false)
@@ -116,7 +114,7 @@ const PreHome = () => {
           onPress: async () => {
             try {
               await stopTracking()
-              await AsyncStorage.removeItem('userId')
+              await AsyncStorage.multiRemove(['userId', 'username', 'userType']);
               router.replace('/Login')
             } catch (error) {
               console.error('Error during logout:', error)
@@ -133,7 +131,7 @@ const PreHome = () => {
       {/* Header */}
       <View className="pt-16 pb-6 px-6 bg-white">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-2xl font-bold text-gray-900">Dashboard</Text>
+          <Text className="text-2xl font-bold text-gray-900">Dashboard 12345</Text>
           <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
             <Text className="text-lg">👤</Text>
           </View>

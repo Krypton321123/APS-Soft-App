@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react"
 import { Modal, Text, ToastAndroid, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { useRouter } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import ky from 'ky'
-import { API_URL } from "@/constants"
+import { API_URL } from "../constants"
 
 export default function Attendance() {
 
+    const { userType } = useLocalSearchParams<{userType: string}>()
     const [showAttendanceModal, setShowAttendanceModal] = useState(false)
     const router = useRouter(); 
 
     useEffect(() => {
         const getAttendanceData = async () => {
             const userId = await AsyncStorage.getItem('userId'); 
+            const userType = await AsyncStorage.getItem('userType'); 
 
             const todayDate = new Date().toLocaleString('en-CA', {
                 day: '2-digit', 
@@ -24,8 +26,8 @@ export default function Attendance() {
 
             const response: any = await ky.post(`${API_URL}/attendance/checkAttendance`, {json: {userId, date: todayDate}}).json();
             console.log(response)
-            if (response.statusCode === 201) {
-                return router.replace('/PreHome')
+            if (response.statusCode === 201 ) {
+                return router.replace(userType === "Salesman" ? '/PreHome' : '/Delivery')
             } else if (response.statusCode === 200) {
                 return ToastAndroid.show('YOU ALREADY MARKED ABSENT FOR TODAY!', ToastAndroid.SHORT)
             } else if(response.statusCode === 202) {
@@ -42,7 +44,7 @@ export default function Attendance() {
         router.replace({ pathname: 
             '/Camera', 
             params: {
-                caller: 'attendance', partyId: ""
+                caller: 'attendance', partyId: "", userType
             }
         })
         setShowAttendanceModal(false)
@@ -52,7 +54,7 @@ export default function Attendance() {
         const now = new Date()
         const date = now.toLocaleDateString()
         const time = now.toLocaleTimeString()
-        return { date, time }
+        return { date, time }; 
     }
 
     const handleAbsent = async () => {
@@ -89,6 +91,14 @@ export default function Attendance() {
             <View className="flex-1 justify-center items-center">
                 <TouchableOpacity onPress={() => setShowAttendanceModal(true)} className="w-40 h-14 flex justify-center items-center rounded-full bg-blue-600">
                     <Text className="text-white font-medium">Mark Attendance</Text>
+                </TouchableOpacity> 
+            </View>
+            <View className="w-full h-20 flex justify-center items-center ">
+                <TouchableOpacity onPress={async () => {
+                    await AsyncStorage.removeItem('userId')
+                    router.replace('/Login')
+                }} className="p-4 w-40 bg-blue-600 rounded-xl">
+                    <Text className="text-white text-center text-lg font-GeistRegular">Back to Login</Text>
                 </TouchableOpacity>
             </View> 
 

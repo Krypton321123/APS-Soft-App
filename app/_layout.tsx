@@ -4,6 +4,7 @@ import { StatusBar} from 'react-native';
 import '../global.css'
 import '@/tasks/locationTask'
 import { useFonts } from 'expo-font'
+import { MenuProvider } from 'react-native-popup-menu'
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -18,14 +19,14 @@ export default function RootLayout() {
   }
 
   return ( 
-    <>
+    <MenuProvider>
       <StatusBar
         barStyle="dark-content"
         backgroundColor="transparent"
         translucent={true}
       />
       <Stack screenOptions={{ headerShown: false }} />
-    </>
+    </MenuProvider>
   );
 }
 

@@ -18,7 +18,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ky from 'ky';
-import { API_URL } from '@/constants';
+import { API_URL } from '../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Define TypeScript interfaces
@@ -54,6 +54,7 @@ interface InputQuantities {
 const Order: React.FC = () => {
   const router = useRouter();
   const { partyId, partyName, userId } = useLocalSearchParams<any>();
+  
   const [orderQuantities, setOrderQuantities] = useState<OrderQuantities>({});
   // Store input values as strings to fix the first digit skipping issue
   const [inputQuantities, setInputQuantities] = useState<InputQuantities>({});
@@ -149,6 +150,8 @@ const Order: React.FC = () => {
       console.log(response)
       if (response.success && response.data) {
         setItems(response.data.items);
+        console.log(response.data.consumerRate)
+        console.log(response.data.bulkRate)
         setConsumerRate(response.data.consumerRate)
         setBulkRate(response.data.bulkRate)
       } else {
@@ -214,6 +217,8 @@ const Order: React.FC = () => {
         empId: userId,
         totalAmount,
         paymentMode, 
+        consumerRate, 
+        bulkRate,
         creditDays: paymentMode === 'credit' ? parseInt(creditDays) : 0,
         discountAmount: parseFloat(discount) || 0,
         orderItems: orderDetails

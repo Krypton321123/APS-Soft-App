@@ -18,8 +18,9 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import ky from 'ky';
-import { API_URL } from '@/constants';
+import { API_URL } from '../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUserId } from '@/store/userIdStore';
 
 // Define TypeScript interfaces
 interface Item {
@@ -39,6 +40,7 @@ interface InputQuantities {
 const Stock = () => {
   const router = useRouter();
   const { partyId, partyName } = useLocalSearchParams<any>();
+  console.log(partyId, partyName)
   const [stockQuantities, setStockQuantities] = useState<StockQuantities>({});
   const [inputQuantities, setInputQuantities] = useState<InputQuantities>({});
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -48,7 +50,7 @@ const Stock = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const flatListRef = useRef<FlatList<Item> | null>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId } = useUserId(); 
 
   // Header animation values
   const headerTranslateY = scrollY.interpolate({
@@ -58,16 +60,6 @@ const Stock = () => {
   });
 
   useEffect(() => {
-    const getUserId = async () => {
-      const user = await AsyncStorage.getItem('userId');
-      if (user) {
-        setUserId(user);
-      }
-    }
-    getUserId();
-  }, []);
-
-  useEffect(() => {
     fetchItems();
   }, []);
 
@@ -75,13 +67,18 @@ const Stock = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await ky.get(`${API_URL}/user/getItems`).json<{
+      console.log("userid ->", userId)
+      const response = await ky.post(`${API_URL}/user/getItems`, {json: {userId}}).json<{
         success: boolean;
-        data?: Item[];
+        data: {
+          items: Item[]
+        };
       }>();
       
+      console.log(response)
+
       if (response.success && response.data) {
-        setItems(response.data);
+        setItems(response.data.items);
       } else {
         setError('Failed to fetch items');
       }

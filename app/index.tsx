@@ -5,26 +5,45 @@ import { useUserId } from '@/store/userIdStore';
 
 const Index = () => {
   const [userId, setUserId] = useState<string | null>(null);
-  const { setUsername } = useUserId()
+  const [userType, setUserType] = useState<string | null>(null);
+  const { setUsername } = useUserId();
 
   useEffect(() => {
-    const getUserId = async () => {
-      const userIdTemp = await AsyncStorage.getItem('userId');
-      const usernameTemp= await AsyncStorage.getItem("username")
-      setUserId(userIdTemp || '');
-      if (userIdTemp) {
-        setUsername(usernameTemp || "", userIdTemp)
+    const getUserData = async () => {
+      try {
+        const userIdTemp = await AsyncStorage.getItem('userId');
+        const usernameTemp = await AsyncStorage.getItem('username');
+        const userTypeTemp = await AsyncStorage.getItem('userType');
+        setUserId(userIdTemp === null ? '' : userIdTemp);
+        setUserType(userTypeTemp === null ? 
+          '' : userTypeTemp
+        );
+
+        if (userIdTemp) {
+          setUsername(usernameTemp || '', userIdTemp);
+        } else {
+          
+          await AsyncStorage.multiRemove(['userId', 'username', 'userType']);
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
       }
     };
 
-    getUserId();
+    getUserData();
   }, []);
 
-  if (userId === null) return null; 
+  if (userId === null || userType === null) return null;
+
+  if (userId === '') {console.log(userId); return <Redirect href={'/Login'} />};
 
   return (
     <>
-      {userId === '' ? <Redirect href="/Login" /> : <Redirect href="/Attendance" />}
+      {userType === 'Salesman' ? (
+        <Redirect href="/PreHome" />
+      ) : (
+        <Redirect href="/Delivery" />
+      )}
     </>
   );
 };

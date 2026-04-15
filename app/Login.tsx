@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import InputComponent from '@/components/login/InputComponent';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import ky from 'ky';
-import { API_URL } from '@/constants';
+import { API_URL } from '../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRouter } from 'expo-router';
 import { useUserId } from '@/store/userIdStore';
@@ -38,15 +38,24 @@ const Login = () => {
       const data: any = await ky
         .post(`${API_URL}/user/login`, { json: { username: username1, password } })
         .json();
+      console.log("here")
+      console.log(data)
 
       if (data.statusCode === 200 || data.statusCode === 201) {
         Alert.alert('Success!', "Logged in successfuly")
         await AsyncStorage.setItem('userId', username1)
         await AsyncStorage.setItem('username', data.data.user.usrnm)
+        await AsyncStorage.setItem('userType', data.data.user.usrtyp)
+        await AsyncStorage.setItem('userAreaCode', data.data.user.untshnm)
         await startTracking()
 
         setUsername(data.data.user.usrnm, username1); 
-        return router.replace('/Attendance');
+        if (data.data.user.usrtyp === "Salesman") {
+          return router.replace({pathname: "/Attendance", params: {userType: "Salesman"}});
+        } else {
+          return router.replace({pathname: '/Attendance', params: {userType: "Delivery"}})
+        }
+        
       }
     } catch (err: any) {
         console.log('we are here in catch')

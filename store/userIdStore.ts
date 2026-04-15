@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 interface UserIdState {
     username: string, 
@@ -9,6 +10,7 @@ interface UserIdState {
 export const useUserId = create<UserIdState>((set) => ({
     username: '', 
     userId: '', 
+    depotName: '', 
     setUsername: (username: string, userId: string) => set(() => ({ username: username, userId: userId })),
   }))
   

@@ -2,13 +2,14 @@ import { Text, View, TouchableOpacity, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { API_URL } from '@/constants'
+import { API_URL } from '../../constants'
 import ky from 'ky'
 import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const PartyDetails = () => {
-  const { partyId } = useLocalSearchParams()
+  const { partyId } = useLocalSearchParams();
+  const [ledcd, lednm] = partyId; 
   const router = useRouter()
   const [partyDetails, setPartyDetails] = useState({
     lednm: 'Loading...',
@@ -25,6 +26,7 @@ const PartyDetails = () => {
 
   useEffect(() => {
     const getUserId = async () => {
+      console.log(ledcd, lednm)
       const user = await AsyncStorage.getItem('userId');
       if (user) {
         setUsername(user);
@@ -36,7 +38,9 @@ const PartyDetails = () => {
   const fetchParty = async () => {
     try {
       setLoading(true)
-      const response: any = await ky.post(`${API_URL}/user/fetchPartyWithId`, {json: {partyId}}).json()
+      const response: any = await ky.post(`${API_URL}/user/fetchPartyWithId`, {json: {partyId: ledcd}}).json()
+
+      console.log(response)
 
       if (response.statusCode === 200) {
         setPartyDetails(prev => ({
@@ -69,14 +73,14 @@ const PartyDetails = () => {
       {/* Header with Party Name, ID and Edit Button */}
       <View className="bg-blue-600 px-4 py-4 flex-row justify-between items-center">
         <View>
-          <Text className="text-white text-xl font-GeistBold">{partyDetails.lednm}</Text>
-          <Text className="text-white text-sm">ID: {partyId}</Text>
+          <Text className="text-white text-xl font-GeistBold">{lednm}</Text>
+          <Text className="text-white text-sm">ID: {ledcd}</Text>
         </View>
         <TouchableOpacity 
           className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center"
           onPress={() => router.push({
             pathname: '/edit/edit',
-            params: { partyId, partyName: partyDetails.lednm }
+            params: { partyId: ledcd, partyName: lednm }
           })}
         >
           <Ionicons name="pencil" size={20} color="white" />
@@ -99,7 +103,7 @@ const PartyDetails = () => {
               </Text>
             </View>
           )}
-          <Text className="text-lg font-GeistBold text-gray-800">{partyDetails.lednm}</Text>
+          <Text className="text-lg font-GeistBold text-gray-800">{lednm}</Text>
           {partyDetails.contactPerson && (
             <Text className="text-sm text-gray-500">Contact: {partyDetails.contactPerson}</Text>
           )}
@@ -142,7 +146,7 @@ const PartyDetails = () => {
         <View className="flex-row justify-around py-4 bg-white border-b border-gray-200">
           <TouchableOpacity className="items-center" onPress={() => router.push({
             pathname: '/order/Order', 
-            params: {partyId, partyName: partyDetails.lednm, userId: username}
+            params: {partyId: ledcd, partyName: lednm, userId: username}
           })}>
             <View className="w-12 h-12 rounded-full bg-blue-100 justify-center items-center mb-1">
               <Text className="text-blue-600 text-xl">📋</Text>
@@ -152,7 +156,7 @@ const PartyDetails = () => {
           
           <TouchableOpacity className="items-center" onPress={() =>  router.push({
             pathname: '/stock/Stock',
-            params: {partyId, partyName: partyDetails.lednm}
+            params: {partyId: ledcd, partyName: lednm}
           })}>
             <View className="w-12 h-12 rounded-full bg-green-100 justify-center items-center mb-1">
               <Text className="text-green-600 text-xl">📦</Text>
@@ -162,7 +166,7 @@ const PartyDetails = () => {
           
           <TouchableOpacity className="items-center" onPress={() => {router.push({
             pathname: `/Camera`, 
-            params: {partyId, caller: 'party'}
+            params: {partyId: ledcd, caller: 'party'}
           })}}>
             <View className="w-12 h-12 rounded-full bg-purple-100 justify-center items-center mb-1">
               <Text className="text-purple-600 text-xl">📷</Text>
@@ -175,8 +179,8 @@ const PartyDetails = () => {
             onPress={() => router.push({
               pathname: '/collection/Collection',
               params: {
-                partyId,
-                partyName: partyDetails.lednm
+                partyId: ledcd,
+                partyName: lednm
               }
             })}
           >

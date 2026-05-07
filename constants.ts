@@ -1,1 +1,1 @@
-export const API_URL = `http://122.160.12.232:8000/api/v1`
+export const API_URL = `https://api.saavlioils.com/api/v1`;

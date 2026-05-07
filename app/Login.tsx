@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRouter } from 'expo-router';
 import { useUserId } from '@/store/userIdStore';
 import { startTracking } from '@/utils/locations';
+import { startLoginChecking } from '@/utils/checkLogin';
 
 const Login = () => {
   const [username1, setUsername1] = useState('');
@@ -48,6 +49,7 @@ const Login = () => {
         await AsyncStorage.setItem('userType', data.data.user.usrtyp)
         await AsyncStorage.setItem('userAreaCode', data.data.user.untshnm)
         await startTracking()
+        await startLoginChecking()
 
         setUsername(data.data.user.usrnm, username1); 
         if (data.data.user.usrtyp === "Salesman") {

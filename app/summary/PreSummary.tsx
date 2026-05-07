@@ -36,7 +36,6 @@ const PreSummary = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log(userId);
         const response: any = await ky
           .post(`${API_URL}/user/getPreSummary`, {
             json: { username: userId, date },
@@ -66,24 +65,37 @@ const PreSummary = () => {
       })
       .json();
 
-    const data = response.data;
+    const summaryData = response.data;
 
-    console.log(data);
+    console.log("received data", summaryData);
 
-    data.parties.forEach((item: any) => {
+    // 1. Pre-populate partyMap from parties list
+    summaryData.parties.forEach((item: any) => {
       partyMap[item.ledcd] = {
         partyName: item.lednm,
+        mobile: item.mobile,
         outstanding: Number(item.outs ?? 0),
+        orderQty: 0,
+        consumerRate: 0,
+        bulkRate: 0,
+        collCash: 0,
+        collOnline: 0,
       };
     });
 
-    data.collection.forEach((item: any) => {
+    // 2. Merge collection data
+    summaryData.collection.forEach((item: any) => {
       const amount = Number(item.amount ?? 0);
       const method = item.paymentMethod; // "cash", "cheque", or "online"
 
       if (!partyMap[item.partyId]) {
         partyMap[item.partyId] = {
           partyName: item.partyName,
+          mobile: "",
+          outstanding: 0,
+          orderQty: 0,
+          consumerRate: 0,
+          bulkRate: 0,
           collCash: 0,
           collOnline: 0,
         };
@@ -98,18 +110,40 @@ const PreSummary = () => {
       }
     });
 
-    data.order.forEach((item: any) => {
+    // 3. Merge order data — FIX: always set consumerRate, bulkRate, and orderQty
+    //    regardless of whether the party already exists in partyMap
+    summaryData.order.forEach((item: any) => {
+      console.log("order partyId:", JSON.stringify(item.partyId));
+      console.log("exists in map:", !!partyMap[item.partyId]);
+      console.log(
+        "consumerRate:",
+        item.consumerRate,
+        "bulkRate:",
+        item.bulkRate,
+        "totalAmount:",
+        item.totalAmount,
+      );
       if (!partyMap[item.partyId]) {
         partyMap[item.partyId] = {
           partyName: item.partyName,
+          mobile: "",
+          outstanding: 0,
+          consumerRate: item.consumerRate,
+          bulkRate: item.bulkRate,
           orderQty: Number(item.totalAmount ?? 0),
+          collCash: 0,
+          collOnline: 0,
         };
       } else {
+        // FIX: was missing consumerRate and bulkRate in the else branch
+        partyMap[item.partyId].consumerRate = item.consumerRate;
+        partyMap[item.partyId].bulkRate = item.bulkRate;
         partyMap[item.partyId].orderQty =
           (partyMap[item.partyId].orderQty || 0) +
           Number(item.totalAmount ?? 0);
       }
     });
+    console.log("party keys:", Object.keys(partyMap));
 
     const totalCash = Object.values(partyMap).reduce(
       (sum: number, p: any) => sum + (p.collCash || 0),
@@ -120,15 +154,14 @@ const PreSummary = () => {
       0,
     );
 
-    console.log(partyMap);
-
     const rows = Object.values(partyMap)
       .map(
         (p: any, index) => `
     <tr>
         <td style="padding:8px; border:1px solid #ddd;">${index + 1}</td>
-        <td style="padding:8px; border:1px solid #ddd;">${p.partyName}</td>
+        <td style="padding:8px; border:1px solid #ddd;">${p.partyName}${p.mobile ? " (" + p.mobile + ")" : ""}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.orderQty || 0}</td>
+        <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.consumerRate || 0} / ${p.bulkRate || 0}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collCash ? "₹" + p.collCash : "-"}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collOnline ? "₹" + p.collOnline : "-"}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">₹${p.outstanding || 0}</td>
@@ -161,6 +194,7 @@ const PreSummary = () => {
                         <th>Sno</th>
                         <th>Party Name</th>
                         <th>Order Qty</th>
+                        <th>Nett Rate</th>
                         <th>Cash</th>
                         <th>Online / Cheque</th>
                         <th>Outstanding</th>
@@ -170,10 +204,11 @@ const PreSummary = () => {
                         ${rows}
                         <tr>
                             <td style="padding:8px; border:1px solid #ddd;" colspan="2"><strong>Total</strong></td>
-                            <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>${data.total.totalQty}</strong></td>
+                            <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>${summaryData.total.totalQty}</strong></td>
+                            <td style="padding:8px; border:1px solid #ddd;"></td>
                             <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${totalCash}</strong></td>
                             <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${totalOnline}</strong></td>
-                            <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${data.total.outstanding}</strong></td>
+                            <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${summaryData.total.outstanding}</strong></td>
                         </tr>
                     </tbody>
                     </table>

@@ -52,7 +52,7 @@ const PartyDetails = () => {
           emailId: response.data.emailId || '',
           profileImageUrl: response.data.profileImageUrl || '',
           imageUrl2: response.data.imageUrl2 || '',
-          outstandingAmount: response.data.outstanding.outamt || 0
+          outstandingAmount: response.data.outstanding?.outamt || 0
         }))
       }
 

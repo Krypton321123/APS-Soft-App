@@ -1,10 +1,14 @@
-import { View, Text, TouchableOpacity, Modal, TextInput, Alert, Animated, Easing, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, Modal, TextInput, Alert, Animated, Easing, ActivityIndicator, Button } from 'react-native'
 import React, { useState, useRef, useEffect } from 'react'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import ky from 'ky'
 import { API_URL } from '../constants'
 import { isTracking, startTracking, stopTracking } from '@/utils/locations'
+import * as BackgroundTask from "expo-background-task";
+import { BACKGROUND_CHECK_LOGIN_TASK } from '@/tasks/checkLoginTask'
+import * as TaskManager from "expo-task-manager"
+import * as ExpoNotifications from "expo-notifications"
 
 const PreHome = () => {
   const [attendanceModalVisible, setAttendanceModalVisible] = useState(false)
@@ -13,8 +17,8 @@ const PreHome = () => {
   const [attendanceStatus, setAttendanceStatus] = useState<'idle' | 'processing' | 'success'>('idle')
   const [selectedOption, setSelectedOption] = useState<'present' | 'absent' | null>(null)
   const [isTracking1, setIsTracking1] = useState(false)
-  
 
+ 
   useEffect(() => {
     const trackingStatus = async () => {
       const temp = await isTracking()
@@ -114,7 +118,7 @@ const PreHome = () => {
           onPress: async () => {
             try {
               await stopTracking()
-              await AsyncStorage.multiRemove(['userId', 'username', 'userType']);
+              await AsyncStorage.multiRemove(['userId', 'username', 'userType', 'userAreaCode']);
               router.replace('/Login')
             } catch (error) {
               console.error('Error during logout:', error)
@@ -131,7 +135,7 @@ const PreHome = () => {
       {/* Header */}
       <View className="pt-16 pb-6 px-6 bg-white">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-2xl font-bold text-gray-900">Dashboard 12345</Text>
+          <Text className="text-2xl font-bold text-gray-900">Dashboard</Text>
           <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
             <Text className="text-lg">👤</Text>
           </View>
@@ -171,6 +175,9 @@ const PreHome = () => {
               </View>
             </View>
           </TouchableOpacity>
+
+       
+          
 
           {/* Change Password */}
           <TouchableOpacity 

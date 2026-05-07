@@ -5,7 +5,8 @@ import { useUserId } from '@/store/userIdStore'
 import ky from 'ky'
 import { API_URL } from '../constants'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+ 
+
 
 const Home = () => {
     const router = useRouter()
@@ -15,6 +16,8 @@ const Home = () => {
     const [searchQuery, setSearchQuery] = useState('')
     const [filteredParties, setFilteredParties] = useState([])
     const [currentDay, setCurrentDay] = useState('')
+
+    
 
     const fetchData = async (userToFetch: string) => {
         if (!userToFetch) {

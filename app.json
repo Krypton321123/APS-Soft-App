@@ -2,7 +2,7 @@
   "expo": {
     "name": "APS",
     "slug": "test-camera-geolocation",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -20,6 +20,7 @@
       "bundleIdentifier": "com.krypton321123.testcamerageolocation"
     },
     "android": {
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
@@ -36,7 +37,7 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION"
       ],
-      "package": "com.krypton321123.testcamerageolocation"
+      "package": "com.krypton321123.aps"
     },
     "web": {
       "bundler": "metro",
@@ -79,7 +80,15 @@
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true
         }
-      ]
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#333",
+          "defaultChannel": "default"
+        }
+      ],
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true

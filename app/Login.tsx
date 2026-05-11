@@ -48,8 +48,8 @@ const Login = () => {
         await AsyncStorage.setItem('username', data.data.user.usrnm)
         await AsyncStorage.setItem('userType', data.data.user.usrtyp)
         await AsyncStorage.setItem('userAreaCode', data.data.user.untshnm)
-        await startTracking()
-        await startLoginChecking()
+        await startTracking();
+        await startLoginChecking();
 
         setUsername(data.data.user.usrnm, username1); 
         if (data.data.user.usrtyp === "Salesman") {

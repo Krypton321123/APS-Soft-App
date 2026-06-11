@@ -10,8 +10,8 @@ import {
   Modal,
   ToastAndroid,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
 import React, { useState, useRef, useEffect, createRef } from "react";
+import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Entypo, Ionicons } from "@expo/vector-icons";
@@ -117,10 +117,9 @@ const Collection = () => {
   };
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: false,
-      aspect: [4, 3],
       quality: 1,
     });
 
@@ -130,7 +129,6 @@ const Collection = () => {
 
     setOnlinePaymentImage(result.assets[0].uri);
   };
-
   const handleCancelOtp = async () => {
     try {
       const response: any = await ky

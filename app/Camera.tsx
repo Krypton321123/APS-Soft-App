@@ -179,8 +179,13 @@ const processPhoto = async (): Promise<void> => {
 
         } else {
 
+            const latitude = gps ? gps.latitude.toString() : ""; 
+            const longitude = gps ? gps.longitude.toString() : ""; 
+
             formData.append('userId', userId);
             formData.append('partyId', partyId);
+            formData.append("latValue", latitude);
+            formData.append("longValue", longitude);
             formData.append('photo', {
                 uri: finalPhotoUri,
                 type: mime.getType(finalPhotoUri),

@@ -2,7 +2,6 @@ import { View, Text, Button, TouchableOpacity, ActivityIndicator, FlatList } fro
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import DateTimePicker, { DateTimePickerAndroid, AndroidNativeProps } from '@react-native-community/datetimepicker'
 import { API_URL } from '../../constants';
 import ky from 'ky'
 

@@ -18,6 +18,7 @@ import { startTracking } from '@/utils/locations'
 const Camera = () => {
     // Extract the partyId from local search params
     const { partyId, caller, userType } = useLocalSearchParams<{ partyId: string, caller: string, userType: string }>();
+    const [processLoading, setProcessLoading] = useState(false); 
     const [facing, setFacing] = useState<CameraType>(caller === 'attendance' ? 'front' : 'back')
     const [permission, requestPermission] = useCameraPermissions(); 
     const [photoData, setPhotoData] = useState<CameraCapturedPicture | null>(null)
@@ -111,6 +112,7 @@ const Camera = () => {
 const processPhoto = async (): Promise<void> => {
 
     console.log("i am here")
+    setProcessLoading(true)
 
     if (!finalPhotoUri) {
         Alert.alert("Error", "No photo data available");
@@ -223,6 +225,8 @@ const processPhoto = async (): Promise<void> => {
     } catch (error) {
         console.error("Error processing photo:", error);
         Alert.alert("Error", error instanceof Error ? error.message : "Failed to process photo");
+    } finally {
+        setProcessLoading(false); 
     }
 };
     const takePicture = async (): Promise<void> => {
@@ -327,10 +331,10 @@ const processPhoto = async (): Promise<void> => {
                         className={` py-3 px-6 rounded-xl flex-row items-center justify-center min-w-32 ${
                             finalPhotoUri ? 'bg-green-500' : 'bg-gray-400'
                         }`}
-                        disabled={!finalPhotoUri && !processing}
+                        disabled={processLoading || (!finalPhotoUri && !processing)}
                     >
-                        <Ionicons name="checkmark-circle" size={24} color="#fff" />
-                        <Text className="text-white font-bold text-base ml-2">Use Photo</Text>
+                        {!processLoading && <Ionicons name="checkmark-circle" size={24} color="#fff" />}
+                        <Text className="text-white font-bold text-base ml-2">{processLoading ? <ActivityIndicator size={24} color="white" /> : "Use Photo"}</Text>
                     </TouchableOpacity>
                 </View>
                 

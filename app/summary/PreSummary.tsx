@@ -187,7 +187,8 @@ const PreSummary = () => {
                     <h1>MAHESH EDIBLE OILS PRODUCTS PVT LTD</h1>
                     <h2>Daily Working Report</h2>
                     <h3>Employee Name - ${username}</h3>
-                    <h4>FOR DATE - ${date} </h4>
+                    <h4>FOR DATE - ${date.toLocaleDateString()}</h4>
+<h4 style="margin-top:6px;">Start Time: ${summaryData.startTime} &nbsp;&nbsp;|&nbsp;&nbsp; End Time: ${summaryData.endTime}</h4>
                     <table>
                     <thead>
                         <tr>

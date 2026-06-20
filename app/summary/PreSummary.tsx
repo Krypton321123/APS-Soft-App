@@ -80,13 +80,14 @@ const PreSummary = () => {
         bulkRate: 0,
         collCash: 0,
         collOnline: 0,
+        visitTime: summaryData.partyVisitTimeMap[item.ledcd] ?? "N/A",
       };
     });
 
     // 2. Merge collection data
     summaryData.collection.forEach((item: any) => {
       const amount = Number(item.amount ?? 0);
-      const method = item.paymentMethod; // "cash", "cheque", or "online"
+      const method = item.paymentMethod;
 
       if (!partyMap[item.partyId]) {
         partyMap[item.partyId] = {
@@ -98,6 +99,7 @@ const PreSummary = () => {
           bulkRate: 0,
           collCash: 0,
           collOnline: 0,
+          visitTime: summaryData.partyVisitTimeMap[item.partyId] ?? "N/A",
         };
       }
 
@@ -110,8 +112,7 @@ const PreSummary = () => {
       }
     });
 
-    // 3. Merge order data — FIX: always set consumerRate, bulkRate, and orderQty
-    //    regardless of whether the party already exists in partyMap
+    // 3. Merge order data
     summaryData.order.forEach((item: any) => {
       console.log("order partyId:", JSON.stringify(item.partyId));
       console.log("exists in map:", !!partyMap[item.partyId]);
@@ -123,6 +124,7 @@ const PreSummary = () => {
         "totalAmount:",
         item.totalAmount,
       );
+
       if (!partyMap[item.partyId]) {
         partyMap[item.partyId] = {
           partyName: item.partyName,
@@ -133,9 +135,9 @@ const PreSummary = () => {
           orderQty: Number(item.totalAmount ?? 0),
           collCash: 0,
           collOnline: 0,
+          visitTime: summaryData.partyVisitTimeMap[item.partyId] ?? "N/A",
         };
       } else {
-        // FIX: was missing consumerRate and bulkRate in the else branch
         partyMap[item.partyId].consumerRate = item.consumerRate;
         partyMap[item.partyId].bulkRate = item.bulkRate;
         partyMap[item.partyId].orderQty =
@@ -143,6 +145,7 @@ const PreSummary = () => {
           Number(item.totalAmount ?? 0);
       }
     });
+
     console.log("party keys:", Object.keys(partyMap));
 
     const totalCash = Object.values(partyMap).reduce(
@@ -155,83 +158,109 @@ const PreSummary = () => {
     );
 
     const rows = Object.values(partyMap)
+      .sort((a: any, b: any) => {
+        // N/A always goes to the bottom
+        if (a.visitTime === "N/A" && b.visitTime === "N/A") return 0;
+        if (a.visitTime === "N/A") return 1;
+        if (b.visitTime === "N/A") return -1;
+
+        // Parse "12:54 pm" / "01:14 pm" style times for comparison
+        const parseTime = (t: string) => {
+          const [time, meridiem] = t.split(" ");
+          let [hours, minutes] = time.split(":").map(Number);
+          if (meridiem?.toLowerCase() === "pm" && hours !== 12) hours += 12;
+          if (meridiem?.toLowerCase() === "am" && hours === 12) hours = 0;
+          return hours * 60 + minutes;
+        };
+
+        return parseTime(a.visitTime) - parseTime(b.visitTime);
+      })
       .map(
         (p: any, index) => `
     <tr>
         <td style="padding:8px; border:1px solid #ddd;">${index + 1}</td>
         <td style="padding:8px; border:1px solid #ddd;">${p.partyName}${p.mobile ? " (" + p.mobile + ")" : ""}</td>
+        <td style="padding:8px; border:1px solid #ddd; text-align:center;">${p.visitTime}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.orderQty || 0}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.consumerRate || 0} / ${p.bulkRate || 0}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collCash ? "₹" + p.collCash : "-"}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collOnline ? "₹" + p.collOnline : "-"}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">₹${p.outstanding || 0}</td>
     </tr>
-`,
+  `,
       )
       .join("");
 
     const htmlContent = `
-                <html>
-                <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    h1, h2, h3, h4 { text-align: center; margin: 0; padding: 0; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                    th, td { border: 1px solid #ddd; padding: 8px; }
-                    th { background-color: #f2f2f2; }
-                    td { vertical-align: top; }
-                    </style>
-                </head>
-                <body>
-                    <h1>MAHESH EDIBLE OILS PRODUCTS PVT LTD</h1>
-                    <h2>Daily Working Report</h2>
-                    <h3>Employee Name - ${username}</h3>
-                    <h4>FOR DATE - ${date.toLocaleDateString()}</h4>
-<h4 style="margin-top:6px;">Start Time: ${summaryData.startTime} &nbsp;&nbsp;|&nbsp;&nbsp; End Time: ${summaryData.endTime}</h4>
-                    <table>
-                    <thead>
-                        <tr>
-                        <th>Sno</th>
-                        <th>Party Name</th>
-                        <th>Order Qty</th>
-                        <th>Nett Rate</th>
-                        <th>Cash</th>
-                        <th>Online / Cheque</th>
-                        <th>Outstanding</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rows}
-                        <tr>
-                            <td style="padding:8px; border:1px solid #ddd;" colspan="2"><strong>Total</strong></td>
-                            <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>${summaryData.total.totalQty}</strong></td>
-                            <td style="padding:8px; border:1px solid #ddd;"></td>
-                            <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${totalCash}</strong></td>
-                            <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${totalOnline}</strong></td>
-                            <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${summaryData.total.outstanding}</strong></td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </body>
-                </html>
-            `;
+      <html>
+      <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1, h2, h3, h4 { text-align: center; margin: 0; padding: 2px 0; }
+            .timing { text-align: center; margin-top: 8px; font-size: 14px; color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; }
+            th { background-color: #f2f2f2; text-align: center; }
+            td { vertical-align: top; }
+          </style>
+      </head>
+      <body>
+          <h1>MAHESH EDIBLE OILS PRODUCTS PVT LTD</h1>
+          <h2>Daily Working Report</h2>
+          <h3>Employee Name - ${username}</h3>
+          <h4>FOR DATE - ${date.toLocaleDateString()}</h4>
+          <p class="timing">
+            <strong>Start Time:</strong> ${summaryData.startTime}
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <strong>End Time:</strong> ${summaryData.endTime}
+          </p>
+          <table>
+          <thead>
+              <tr>
+                <th>Sno</th>
+                <th>Party Name</th>
+                <th>Visit Time</th>
+                <th>Order Qty</th>
+                <th>Nett Rate</th>
+                <th>Cash</th>
+                <th>Online / Cheque</th>
+                <th>Outstanding</th>
+              </tr>
+          </thead>
+          <tbody>
+              ${rows}
+              <tr>
+                  <td style="padding:8px; border:1px solid #ddd;" colspan="3"><strong>Total</strong></td>
+                  <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>${summaryData.total.totalQty}</strong></td>
+                  <td style="padding:8px; border:1px solid #ddd;"></td>
+                  <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${totalCash}</strong></td>
+                  <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${totalOnline}</strong></td>
+                  <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${summaryData.total.outstanding}</strong></td>
+              </tr>
+          </tbody>
+          </table>
+      </body>
+      </html>
+    `;
 
     const { uri } = await Print.printToFileAsync({ html: htmlContent });
-
     await shareAsync(uri, {});
   };
 
   return (
     <SafeAreaView className="flex-1">
+      {/* Header */}
       <View className="h-20 flex justify-center bg-blue-600 p-2">
         <Text className="text-white font-bold text-2xl">Summary</Text>
       </View>
+
+      {/* Date Picker */}
       <View className="pt-5 pb-5 px-5 flex-row items-center gap-14">
         <Text className="text-xl font-semibold">Date Selection</Text>
         <TouchableOpacity
           onPress={() => setShow(true)}
-          className=" flex justify-center items-center bg-blue-600 w-40 rounded-lg py-5 ml-4"
+          className="flex justify-center items-center bg-blue-600 w-40 rounded-lg py-5 ml-4"
         >
           <Text className="text-white font-GeistRegular">
             {date.toLocaleDateString()}
@@ -247,12 +276,14 @@ const PreSummary = () => {
           />
         )}
       </View>
+
       {loading === true && data === null ? (
         <View className="flex-1 flex justify-center items-center">
           <ActivityIndicator size={40} />
         </View>
       ) : (
         <View className="flex-1 mt-4">
+          {/* Attendance */}
           <View className="flex flex-col gap-2">
             <View className="flex px-4 py-4">
               <Text className="text-xl font-medium">
@@ -261,6 +292,7 @@ const PreSummary = () => {
             </View>
           </View>
 
+          {/* Order Summary */}
           <TouchableOpacity
             onPress={() =>
               router.push({
@@ -297,6 +329,8 @@ const PreSummary = () => {
               </View>
             </View>
           </TouchableOpacity>
+
+          {/* Collection Summary */}
           <TouchableOpacity
             onPress={() =>
               router.push({
@@ -331,6 +365,8 @@ const PreSummary = () => {
               </View>
             </View>
           </TouchableOpacity>
+
+          {/* Action Buttons */}
           <View className="py-2 flex flex-col gap-3">
             <TouchableOpacity
               onPress={() => generateAndSharePDF()}

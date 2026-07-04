@@ -116,17 +116,6 @@ const PreSummary = () => {
 
     // 3. Merge order data
     summaryData.order.forEach((item: any) => {
-      console.log("order partyId:", JSON.stringify(item.partyId));
-      console.log("exists in map:", !!partyMap[item.partyId]);
-      console.log(
-        "consumerRate:",
-        item.consumerRate,
-        "bulkRate:",
-        item.bulkRate,
-        "totalAmount:",
-        item.totalAmount,
-      );
-
       if (!partyMap[item.partyId]) {
         partyMap[item.partyId] = {
           partyName: item.partyName,
@@ -136,6 +125,7 @@ const PreSummary = () => {
           consumerRate: item.consumerRate,
           bulkRate: item.bulkRate,
           orderQty: Number(item.totalAmount ?? 0),
+          orderType: item.paymentMode || "N/A",
           collCash: 0,
           collOnline: 0,
           visitTime: summaryData.partyVisitTimeMap[item.partyId] ?? "N/A",
@@ -146,6 +136,7 @@ const PreSummary = () => {
         partyMap[item.partyId].orderQty =
           (partyMap[item.partyId].orderQty || 0) +
           Number(item.totalAmount ?? 0);
+        partyMap[item.partyId].orderType = item.paymentMode || "N/A";
       }
     });
 
@@ -180,20 +171,21 @@ const PreSummary = () => {
       })
       .map(
         (p: any, index) => `
-    <tr>
-        <td style="padding:8px; border:1px solid #ddd;">${index + 1}</td>
-        <td style="padding:8px; border:1px solid #ddd;">${p.partyName}${p.mobile ? " (" + p.mobile + ")" : ""}</td>
-        <td style="padding:8px; border:1px solid #ddd; text-align:center;">${p.visitTime}</td>
-        <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.orderQty || 0}</td>
-        <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.consumerRate || 0} / ${p.bulkRate || 0}</td>
-        <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collCash ? "₹" + p.collCash : "-"}</td>
-        <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collOnline ? "₹" + p.collOnline : "-"}</td>
-        <td style="padding:8px; border:1px solid #ddd; text-align:right;">
-  ₹${p.outstanding || 0}
-  ${p.billDate && p.billDate !== "N/A" ? `<br/><span style="font-size:11px; color:#666;">${p.billDate}</span>` : ""}
+<tr>
+    <td style="padding:8px; border:1px solid #ddd;">${index + 1}</td>
+    <td style="padding:8px; border:1px solid #ddd;">${p.partyName}${p.mobile ? " (" + p.mobile + ")" : ""}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:center;">${p.visitTime}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.orderQty || 0}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:center; text-transform:capitalize;">${p.orderType || "N/A"}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.consumerRate || 0} / ${p.bulkRate || 0}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collCash ? "₹" + p.collCash : "-"}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collOnline ? "₹" + p.collOnline : "-"}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:right;">
+₹${p.outstanding || 0}
+${p.billDate && p.billDate !== "N/A" ? `<br/><span style="font-size:11px; color:#666;">${p.billDate}</span>` : ""}
 </td>
-    </tr>
-  `,
+</tr>
+`,
       )
       .join("");
 
@@ -223,21 +215,22 @@ const PreSummary = () => {
           </p>
           <table>
           <thead>
-              <tr>
-                <th>Sno</th>
-                <th>Party Name</th>
-                <th>Visit Time</th>
-                <th>Order Qty</th>
-                <th>Nett Rate</th>
-                <th>Cash</th>
-                <th>Online / Cheque</th>
-                <th>Outstanding</th>
-              </tr>
-          </thead>
+    <tr>
+      <th>Sno</th>
+      <th>Party Name</th>
+      <th>Visit Time</th>
+      <th>Order Qty</th>
+      <th>Order Type</th>
+      <th>Nett Rate</th>
+      <th>Cash</th>
+      <th>Online / Cheque</th>
+      <th>Outstanding</th>
+    </tr>
+</thead>
           <tbody>
               ${rows}
               <tr>
-                  <td style="padding:8px; border:1px solid #ddd;" colspan="3"><strong>Total</strong></td>
+                  <td style="padding:8px; border:1px solid #ddd;" colspan="4"><strong>Total</strong></td>
                   <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>${summaryData.total.totalQty}</strong></td>
                   <td style="padding:8px; border:1px solid #ddd;"></td>
                   <td style="padding:8px; border:1px solid #ddd; text-align:right;"><strong>₹${totalCash}</strong></td>

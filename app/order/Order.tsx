@@ -82,52 +82,58 @@ const Order: React.FC = () => {
   const [bulkRate, setBulkRate] = useState();
 
   useEffect(() => {
-    const fetchTodayOrders = async () => {
-      try {
-        const response = await ky
-          .get(`${API_URL}/orders/today/${partyId}`)
-          .json<{
-            success: boolean;
-            data?: {
-              orderItems: {
-                itemCode: string;
-                quantity: number;
-              }[];
+  const fetchTodayOrders = async () => {
+    try {
+      const response = await ky
+        .get(`${API_URL}/orders/today/${partyId}`)
+        .json<{
+          success: boolean;
+          data?: {
+            orderItems: {
+              itemCode: string;
+              quantity: number;
             }[];
-          }>();
+          }[];
+        }>();
 
-        if (response.success && response.data && response.data.length > 0) {
-          const latestOrder: any = response.data[0];
+      if (response.success && response.data && response.data.length > 0) {
+        const latestOrder: any = response.data[0];
 
-          const newOrderQuantities: OrderQuantities = {};
-          const newInputQuantities: InputQuantities = {};
+        const newOrderQuantities: OrderQuantities = {};
+        const newInputQuantities: InputQuantities = {};
 
-          latestOrder.orderItems.forEach((item: any) => {
-            newOrderQuantities[item.itemCode] = item.quantity;
-            newInputQuantities[item.itemCode] = item.quantity.toString();
-          });
+        latestOrder.orderItems.forEach((item: any) => {
+          newOrderQuantities[item.itemCode] = item.quantity;
+          newInputQuantities[item.itemCode] = item.quantity.toString();
+        });
 
-          setOrderQuantities(newOrderQuantities);
-          setInputQuantities(newInputQuantities);
+        setOrderQuantities(newOrderQuantities);
+        setInputQuantities(newInputQuantities);
 
-          if (latestOrder.discountAmount) {
-            setDiscount(latestOrder.discountAmount.toString());
-          }
-          // Restore bulk discount if it exists
-          if (latestOrder.discountAmountBulk) {
-            // <-- NEW
-            setDiscountBulk(latestOrder.discountAmountBulk.toString());
-          }
+        if (latestOrder.discountAmount) {
+          setDiscount(latestOrder.discountAmount.toString());
         }
-      } catch (error) {
-        console.error("Error fetching today's orders:", error);
-      }
-    };
+        if (latestOrder.discountAmountBulk) {
+          setDiscountBulk(latestOrder.discountAmountBulk.toString());
+        }
 
-    if (partyId) {
-      fetchTodayOrders();
+        // Restore payment mode + credit days
+        if (latestOrder.paymentMode === "credit" || latestOrder.paymentMode === "cash") {
+          setPaymentMode(latestOrder.paymentMode);
+        }
+        if (latestOrder.creditDays != null) {
+          setCreditDays(latestOrder.creditDays.toString());
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching today's orders:", error);
     }
-  }, [partyId]);
+  };
+
+  if (partyId) {
+    fetchTodayOrders();
+  }
+}, [partyId]);
 
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, 100],

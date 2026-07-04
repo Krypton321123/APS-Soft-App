@@ -75,6 +75,7 @@ const PreSummary = () => {
         partyName: item.lednm,
         mobile: item.mobile,
         outstanding: Number(item.outs ?? 0),
+        billDate: item.billdt ?? "N/A",
         orderQty: 0,
         consumerRate: 0,
         bulkRate: 0,
@@ -94,6 +95,7 @@ const PreSummary = () => {
           partyName: item.partyName,
           mobile: "",
           outstanding: 0,
+          billDate: "N/A",
           orderQty: 0,
           consumerRate: 0,
           bulkRate: 0,
@@ -130,6 +132,7 @@ const PreSummary = () => {
           partyName: item.partyName,
           mobile: "",
           outstanding: 0,
+          billDate: "N/A",
           consumerRate: item.consumerRate,
           bulkRate: item.bulkRate,
           orderQty: Number(item.totalAmount ?? 0),
@@ -185,7 +188,10 @@ const PreSummary = () => {
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.consumerRate || 0} / ${p.bulkRate || 0}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collCash ? "₹" + p.collCash : "-"}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.collOnline ? "₹" + p.collOnline : "-"}</td>
-        <td style="padding:8px; border:1px solid #ddd; text-align:right;">₹${p.outstanding || 0}</td>
+        <td style="padding:8px; border:1px solid #ddd; text-align:right;">
+  ₹${p.outstanding || 0}
+  ${p.billDate && p.billDate !== "N/A" ? `<br/><span style="font-size:11px; color:#666;">${p.billDate}</span>` : ""}
+</td>
     </tr>
   `,
       )

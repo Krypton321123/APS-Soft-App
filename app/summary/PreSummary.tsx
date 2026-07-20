@@ -105,6 +105,10 @@ const PreSummary = () => {
         "[SharePDF] Step 2d: summaryData.partyVisitTimeMap =",
         summaryData.partyVisitTimeMap,
       );
+      console.log(
+        "[SharePDF] Step 2e: summaryData.newPartyOrders =",
+        summaryData.newPartyOrders,
+      );
 
       if (!summaryData.partyVisitTimeMap) {
         console.log(
@@ -116,6 +120,20 @@ const PreSummary = () => {
         );
       }
       const partyVisitTimeMap = summaryData.partyVisitTimeMap || {};
+
+      // getSummary may predate this key on an old backend deploy — default
+      // to an empty array so the new-party-order table below just renders
+      // nothing instead of throwing, same defensive pattern as
+      // partyVisitTimeMap above.
+      if (!Array.isArray(summaryData.newPartyOrders)) {
+        console.log(
+          "[SharePDF] WARNING: summaryData.newPartyOrders is missing or not an array. " +
+            "Falling back to an empty array — the New Party Order table will be omitted from the PDF.",
+        );
+      }
+      const newPartyOrders = Array.isArray(summaryData.newPartyOrders)
+        ? summaryData.newPartyOrders
+        : [];
 
       if (!Array.isArray(summaryData.parties)) {
         console.log(
@@ -287,6 +305,30 @@ ${p.billDate && p.billDate !== "N/A" ? `<br/><span style="font-size:11px; color:
 
       console.log("[SharePDF] Step 7: rows HTML built, length =", rows.length);
 
+      // New Party Order table — separate section below the main summary
+      // table. Deliberately minimal: just name, visit time (createdAt of
+      // the NewPartyOrder row, since the mandatory shop photo is taken
+      // immediately before save), and order qty. Does not touch or merge
+      // into partyMap/rows above, since these parties have no ledcd and
+      // aren't part of the registered-party summary.
+      const newPartyRows = newPartyOrders
+        .map(
+          (p: any, index: number) => `
+<tr>
+    <td style="padding:8px; border:1px solid #ddd;">${index + 1}</td>
+    <td style="padding:8px; border:1px solid #ddd;">${p.partyName}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:center;">${p.visitTime}</td>
+    <td style="padding:8px; border:1px solid #ddd; text-align:right;">${p.totalQty || 0}</td>
+</tr>
+`,
+        )
+        .join("");
+
+      console.log(
+        "[SharePDF] Step 7b: newPartyRows HTML built, length =",
+        newPartyRows.length,
+      );
+
       const htmlContent = `
         <html>
         <head>
@@ -339,6 +381,26 @@ ${p.billDate && p.billDate !== "N/A" ? `<br/><span style="font-size:11px; color:
                 </tr>
             </tbody>
             </table>
+            ${
+              newPartyOrders.length > 0
+                ? `
+            <h2 style="margin-top:24px;">New Party Order</h2>
+            <table>
+            <thead>
+      <tr>
+        <th>Sno</th>
+        <th>Party Name</th>
+        <th>Visit Time</th>
+        <th>Order Qty</th>
+      </tr>
+  </thead>
+            <tbody>
+                ${newPartyRows}
+            </tbody>
+            </table>
+            `
+                : ""
+            }
         </body>
         </html>
       `;

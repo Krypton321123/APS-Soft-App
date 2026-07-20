@@ -24,6 +24,30 @@ const PartyDetails = () => {
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState(''); 
 
+  // ── Secondary Parties ─────────────────────────────────────────────────
+  // Only rendered when mstvendor has at least one row with ledcd = this
+  // party, per explicit decision (no button shown for empty state).
+  const [hasSecondaryParties, setHasSecondaryParties] = useState(false)
+
+  const checkSecondaryParties = async () => {
+    try {
+      const response: any = await ky
+        .get(`${API_URL}/user/checkVendorsExist`, {
+          searchParams: { ledcd },
+        })
+        .json()
+
+      if (response.statusCode === 200) {
+        setHasSecondaryParties(response.data.hasVendors)
+      }
+    } catch (error) {
+      console.error('Error checking secondary parties:', error)
+      // Fail closed — if the check fails, don't show a button that might
+      // lead to an empty/broken list.
+      setHasSecondaryParties(false)
+    }
+  }
+
   useEffect(() => {
     const getUserId = async () => {
       console.log(ledcd, lednm)
@@ -33,6 +57,7 @@ const PartyDetails = () => {
       }
     }
     getUserId();
+    checkSecondaryParties();
   }, [])
 
   const fetchParty = async () => {
@@ -227,8 +252,20 @@ const PartyDetails = () => {
         </View>
       </View>
       
-      {/* Back Button */}
+      {/* Secondary Parties + Back Button */}
       <View className="p-4">
+        {hasSecondaryParties && (
+          <TouchableOpacity
+            className="bg-purple-600 p-4 rounded-lg items-center mb-3 flex-row justify-center"
+            onPress={() => router.push({
+              pathname: '/secondary/SecondaryPartyList',
+              params: { ledcd, lednm, userId: username }
+            } as any)}
+          >
+            <Ionicons name="people-outline" size={20} color="white" style={{ marginRight: 8 }} />
+            <Text className="font-GeistBold text-white">Secondary Parties</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity 
           className="bg-blue-600 p-4 rounded-lg items-center"
           onPress={() => router.back()}
